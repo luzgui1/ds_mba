@@ -1,0 +1,13 @@
+Poste aqui o Diagrama Entidade-Relacionamento e o script contendo a criação das tabelas em SQL do exercício abaixo. O diagrama precisa conter: Entidades, Atributos, Relacionamentos e Cardinalidade (Máxima).
+Caso os recursos estejam em nuvem, pode enviar aqui um arquivo texto contendo o endereço eletrônico (certifique-se que está com permissão de leitura). 
+É possível, ainda, anexar um arquivo compactado (caso haja necessidade de enviar vários arquivos).
+----
+
+Uma administradora administra condomínios formados por unidades condominiais.​
+É importante saber do condomínio: O endereço e a situação atual (em construção ou construído). ​
+De cada unidade, é importante saber: o bloco, o número, a quantidade de metros quadrados e o número de cômodos.​
+Cada unidade condominial é de propriedade de uma ou mais pessoas. Uma pessoa pode ser proprietária de diversas unidades.​
+De cada pessoa é importante saber: Nome completo e CPF.
+A mesma administradora deseja passar a administrar também os aluguéis das unidades condominiais.​
+Cada unidade pode estar alugada para no máximo uma pessoa. Uma pessoa pode alugar diversas unidade.​
+Também deseja-se saber o nome e CPF das pessoas que estão alugando as unidades.

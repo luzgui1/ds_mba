@@ -1,0 +1,295 @@
+#########################################################
+# Curso: Data Science and Artificial Intelligence
+# Disciplina: Data Architecture, Integration and Ingestion
+# Data: 2024
+# Prof.: Ivan Gancev - profivan.gancev@fiap.com.br
+#########################################################
+
+#####################################
+####### PRÉ-REQUISITOS ANTES DE INICIAR O EXERCÍCIO
+#####################################
+--Instalação do docker, através do link abaixo para download (selecionar de acordo com o sistema operacional (WINDOWS, MAC, LINUX))
+https://www.docker.com/products/docker-desktop/
+
+--Instalação do git através do link abaixo (selecione de acordo com seu sistema operacional (WINDOWS, MAC, LINUX))
+https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+
+--Acesse o terminal do seu Sistema Operacional e crie um diretório para armazenar as imagens
+Para WINDOWS uso o comando:      mkdir c:\docker\dts
+Para MAC ou LINUX use o comando: mkdir /docker/dts
+
+-- Acesse o diretório "docker"
+Para WINDOWS uso o comando:      cd \docker\dts
+Para MAC ou LINUX use o comando: cd /docker/dts
+
+-- Clonar repositório com imagens do ecossistema Hadoop
+     git clone https://github.com/fabiogjardim/bigdata_docker.git
+
+-- Acesse o diretório "bigdata_docker"
+Para WINDOWS uso o comando:      cd \docker\dts\bigdata_docker
+Para MAC ou LINUX use o comando: cd /docker/dts/bigdata_docker
+
+--Iniciar os containeres para uso do nifi
+     docker-compose up -d
+     docker image ls
+
+#####################################
+########## B O N U S ################
+######## AMBIENTE HADOOP ############
+#####################################
+--Dados do containers
+     docker container inspect [nome do container]
+
+--Iniciar um container
+     docker-compose up -d [nome do container]
+
+--Iniciar todos os containers
+     docker-compose up -d 
+
+--Parar todos containers
+     docker stop $(docker ps -a -q)
+No Powershell
+    docker ps -q | % { docker stop $_ }
+
+--Acessar log do container
+     docker container logs [nome do container] 
+
+--Acesso WebUI dos Frameworks
+HDFS:          http://localhost:50070
+Presto:        http://localhost:8080
+Nifi:          http://localhost:9090/nifi
+Jupyter Spark: http://localhost:8889
+Hue:           http://localhost:8888
+Spark:         http://localhost:4040
+
+--Acesso por shell
+--HDFS
+      docker exec -it datanode bash
+
+--Sqoop
+      docker exec -it datanode bash
+
+--Usuários e senhas
+Hue
+Usuário: admin
+Senha: admin
+
+MySQL
+Usuário: root
+Senha: secret
+
+#####################################
+########## INÍCIO EXERCÍCIO #########
+#####################################
+--PREPARANDO O MONGODB
+********************
+*MongoDB
+*Usuário: root
+*Senha: root
+*Authentication Database: admin
+********************
+--01) Acessar o container do mongo
+docker container exec -it mongo bash
+
+--02) Acessar o mongo com o usuário root
+mongo -u root -p
+
+--03) Acessar o database dbAula
+use dbAula
+
+--04) Criar a collection bitcoinraw
+db.createCollection("bitcoin_raw")
+
+--05) Sair da CLI do mongo
+quit()
+
+--06) Sair do docker mongo
+exit
+
+--07) Verificar qual o IP do docker mongo
+No Terminal use o comando abaixo e veja o ip no campo "IPAddress":
+docker container inspect mongo
+
+##########################################################################
+--USANDO NIFI PARA CARGA DOS DADOS BRUTOS NO MONGO
+
+--08) Adicionar um processor InvokeHTTP
+Clicar em "Processor" no menu superior e arastar para o board.
+Selecionar o processor chamado InvokeHTTP
+
+--09) Configurar a API de cotação de bitcoin
+ABA "Properties":
+     Remote URL= http://api.coindesk.com/v1/bpi/currentprice.json
+ABA "Settings":
+     Marcar "Automatically Terminate Relationships" para:
+     - Failure
+     - No Retry
+     - Original
+     - Retry
+
+--10) Adicionar processor UpdateAttribute
+Clicar em "Processor" no menu superior e arastar para o board.
+Selecionar o processor chamado UpdateAttribute
+Clicar no processor "InvokeHTTP" e arrastar para o processor "UpdateAttribute"
+Selecionar o relacionamento "Success"
+
+--11) Configurar processor UpdateAttribute
+ABA properties, adicionar 2 atributos
+     Content-Type=application/json
+     mime.type=application/json
+
+--12) Adicionar um processor PutMongoRecord
+Clicar em "Processor" no menu superior e arastar para o board.
+Selecionar o processor chamado PutMongoRecord
+Clicar no processor "UpdateAttribute" e arrastar para o processor "PutMongoRecord"
+Selecionar o relacionamento "Success"
+
+--13) Configurar o processor PutMongoRecord
+ABA "Properties":
+     Mongo URI=             mongodb://root:root@<IP do docker mongo>:27017
+          Obs.: EXEMPLO de URI : mongodb://root:root@172.18.0.7:27017
+     Mongo Database Name=   dbAula
+     Mongo Collection Name= bitcoin_raw
+     Record Reader=         Adicione JsonTreeReader
+ABA "Settings":
+     Marcar "Automatically Terminate Relationships" para:
+     - Failure
+     - Success
+
+--14) Inicie os processors do nifi
+Selecione todos os processors adicionados e use o botão "play" no menu "operate"
+
+--15) Verificar os dados acessando o mongo
+No Terminal use os comandos abaixo:
+docker container exec -it mongo bash
+mongo -u root -p
+
+--16) Acessar o database dbAula
+use dbAula
+
+--17) Consultar a collection bitcoinraw
+db.bitcoin_raw.find()
+Obs.: Digite "quit()" para sair do mongo
+Obs.: Digite "exit" para sair do container
+
+##########################################################################
+--PREPARANDO O MYSQL
+********************
+*MySQL
+*Usuário: root
+*Senha: secret
+********************
+--18) Acessar o container database
+docker container exec -it database bash
+
+--19) Acessar o mysql com o usuário root
+mysql -u root -p
+digite a senha "secret"
+
+--20) Criar um database chamado dbAula
+create database dbAula;
+
+--21) Acessar o database dbAula
+use dbAula;
+
+--22) Criar uma tabela chamada bitcoin_rate
+create table dbAula.bitcoin_rate(data datetime, usd decimal(20,4), gbp decimal(20,4), eur decimal(20,4));
+
+--23) Criar uma tabela chamada bitcoin_rate
+quit
+
+--24) Sair do docker database
+exit
+
+--25) Verificar qual o IP do docker database
+No prompt do Windows use o comando:
+docker container inspect database
+veja o ip no campo "IPAddress"
+
+--26) Baixar o arquivo “mysql-connector-j-8.0.33.jar” para sua máquina local
+Descompacte o arquivo "Aula05 - exercícios.zip" das apostilas na pasta de destino abaixo:
+Para WINDOWS:      c:\docker\dts
+Para MAC ou LINUX: /docker/dts
+
+--27) Copiar o arquivo do driver para o nifi
+WINDOWS: docker container cp C:\docker\dts\mysql-connector-j-8.0.33.jar nifi:/opt/nifi/nifi-current/lib
+MAC/LINUX: docker container cp /docker/dts/mysql-connector-j-8.0.33.jar nifi:/opt/nifi/nifi-current/lib
+
+##########################################################################
+--USANDO NIFI PARA CARGA DOS DADOS PRONTOS NO MYSQL
+--28) Adicionar um processor EvaluateJsonPath
+Clicar em "Processor" no menu superior e arrastar para o board.
+Selecionar o processor chamado EvaluateJsonPath
+Clicar no processor "UpdateAttribute" e arrastar para o processor "EvaluateJsonPath"
+Selecionar o relacionamento "Success"
+
+--29) Configurar o processor para extrair os campos data, usd, gbp e eur
+ABA Properties
+     Return Type= json
+     Destionation=flowfile-attribute
+     Adicionar as propriedades:
+     data= $.time.updatedISO
+     usd= $.bpi.USD.rate
+     gbp= $.bpi.GBP.rate
+     eur= $.bpi.EUR.rate
+ABA Settings
+     Marcar "Automatically Terminate Relationships" para:
+     - Failure
+     - unmatched
+
+--30) Adicionar um processor AttributesToJson
+Clicar em "Processor" no menu superior e arastar para o board.
+Selecionar o processor chamado AttributesToJson
+Clicar no processor "EvaluateJsonPath" e arrastar para o processor "AttributesToJson"
+Selecionar o relacionamento "matched"
+
+--31) Configurar processor AttributesToJson para gerar um novo json
+ABA Properties
+     Destination = flowfile-content
+     Attributes List= data, usd, gbp, eur
+ABA Settings
+     Marcar "Automatically Terminate Relationships" para:
+     - Failure
+
+--32) Adicionar um processor PutSQL
+Clicar em "Processor" no menu superior e arastar para o board.
+Selecionar o processor chamado PutSQL
+Clicar no processor "AttributesToJson" e arrastar para o processor "PutSQL"
+Selecionar o relacionamento "Success"
+
+--33) Configurar a conexão do processor
+ABA Properties:
+     Em "JDBC Connection Pool" criar uma nova conexão
+          Na aba properties da conexão:
+               Database Connection URL    = jdbc:mysql://<IP do docker database>:3306/dbAula
+                     Obs.: EXEMPLO de URL : jdbc:mysql://172.18.0.3:3306/dbAula
+               Database Driver Class Name = com.mysql.cj.jdbc.Driver
+               Database Driver Location(s)= /opt/nifi/nifi-current/lib
+               Database User              = root
+               Password                   = secret
+          Clique em "OK" e habilite a conexão no símbolo de "raio" a direita da na linha da conexão
+
+--34) Configurar instrução SQL para o PutSQL
+ABA Properties:
+     SQL statement= insert into dbAula.bitcoin_rate(data, usd, gbp, eur) values(STR_TO_DATE('${data}', '%Y-%m-%dT%H:%i:%s+00:00'),${usd:replace(',', '')},${gbp:replace(',', '')},${eur:replace(',', '')})
+
+--35) Inicie os processors do nifi
+Selecione todos os processors adicionados e use o botão "play" no menu "operate"
+
+##########################################################################
+--VERIFICAR OS DADOS NO MYSQL
+
+--36) Acessar o container database
+Digitar no seu terminal a linha de comando abaixo:
+docker container exec -it database bash
+
+--37) Acessar o mysql com o usuário root
+mysql -u root -p
+
+--38) Acessar o database dbAula
+use dbAula;
+
+--39) Fazer um select na tabela bitcoin_rate
+select * from dbAula.bitcoin_rate;
+
+

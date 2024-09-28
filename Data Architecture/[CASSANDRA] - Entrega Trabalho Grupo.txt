@@ -1,0 +1,89 @@
+#########################################################
+# TRABALHO EM GRUPO
+#
+# Curso: Data Science and Artificial Intelligence
+# Disciplina: Data Architecture, Integration and Ingestion
+# Data: 2024
+# Prof.: Ivan Gancev - profivan.gancev@fiap.com.br
+#
+# GRUPO:
+# BRUNO KIYOTA GOMES DE OLIVEIRA (356470)
+# GUILHERME FERREIRA LUZ (353625)
+# LUCAS GABRIEL CORDEIRO ALENCAR  (353691)
+# TIAGO HOVADICK E SALLES (354679) 
+#########################################################
+
+
+
+-- Criar container a partir da imagem
+docker run --name MyCassandra -it cassandra bash
+
+-- iniciar a imagem Baixada
+cassandra -R
+
+-- Acessar o CLI do Cassandra
+cqlsh
+
+-- Criar um keyspace
+CREATE KEYSPACE kstr1
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+
+-- Acessar keyspace
+use kstr1;
+
+-- Criação das tabelas
+
+CREATE TABLE products (code int, name text, model text, seller text, color text, size int, PRIMARY KEY (code));
+
+CREATE TABLE clients (cpf bigint, name text, address text, cep int, email text, phone bigint, PRIMARY KEY (cpf));
+
+CREATE TABLE orders (id int, address text, cep int, itens list<text>, quantity int, value float, PRIMARY KEY (id));
+
+-- Inserção e dados:
+
+-- -- Inserção e 10 registros na tabela "products":
+
+INSERT INTO products (code, name, model, seller, color, size) VALUES (1, 'Tênis Esportivo', 'XYZ123', 'Nike', 'Preto', 42);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (2, 'Sapatênis', 'ABC456', 'Adidas', 'Branco', 40);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (3, 'Chinelo', 'PQR789', 'Havaianas', 'Azul', 38);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (4, 'Bota', 'LMN012', 'Timberland', 'Marrom', 43);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (5, 'Sapato Social', 'DEF345', 'Vizzano', 'Preto', 39);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (6, 'Sandália', 'GHI678', 'Grendene', 'Vermelho', 37);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (7, 'Mocassim', 'JKL901', 'Ferracini', 'Bege', 41);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (8, 'Alpargata', 'STU234', 'Moleca', 'Rosa', 36);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (9, 'Coturno', 'VWX567', 'Dr. Martens', 'Preto', 44);
+INSERT INTO products (code, name, model, seller, color, size) VALUES (10, 'Chuteira', 'YZA890', 'Puma', 'Verde', 40);
+
+-- -- Inserção de 10 registros na tabela "clients":
+
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (12345678901, 'João Silva', 'Rua A, 123', 12345000, 'joao.silva@example.com', 11987654321);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (23456789012, 'Maria Souza', 'Rua B, 456', 23456000, 'maria.souza@example.com', 11987654322);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (34567890123, 'Pedro Santos', 'Rua C, 789', 34567000, 'pedro.santos@example.com', 11987654323);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (45678901234, 'Ana Oliveira', 'Rua D, 101', 45678000, 'ana.oliveira@example.com', 11987654324);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (56789012345, 'Lucas Lima', 'Rua E, 202', 56789000, 'lucas.lima@example.com', 11987654325);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (67890123456, 'Fernanda Costa', 'Rua F, 303', 67890000, 'fernanda.costa@example.com', 11987654326);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (78901234567, 'Ricardo Almeida', 'Rua G, 404', 78901000, 'ricardo.almeida@example.com', 11987654327);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (89012345678, 'Juliana Pereira', 'Rua H, 505', 89012000, 'juliana.pereira@example.com', 11987654328);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (90123456789, 'Gustavo Rocha', 'Rua I, 606', 90123000, 'gustavo.rocha@example.com', 11987654329);
+INSERT INTO clients (cpf, name, address, cep, email, phone) VALUES (12345678090, 'Bruna Cardoso', 'Rua J, 707', 12346000, 'bruna.cardoso@example.com', 11987654330);
+
+-- -- Inserção de registros na tabela "orders":
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (1, 'Rua A, 123', 12345000, ['Tênis Esportivo'], 1, 299.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (2, 'Rua B, 456', 23456000, ['Sapatênis', 'Chinelo'], 2, 199.98);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (3, 'Rua C, 789', 34567000, ['Chinelo', 'Sandália'], 3, 59.97);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (4, 'Rua D, 101', 45678000, ['Bota'], 1, 399.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (5, 'Rua E, 202', 56789000, ['Sapato Social'], 1, 249.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (6, 'Rua F, 303', 67890000, ['Sandália', 'Tênis Esportivo'], 2, 139.98);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (7, 'Rua G, 404', 78901000, ['Mocassim'], 1, 179.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (8, 'Rua H, 505', 89012000, ['Alpargata', 'Sapatênis'], 1, 89.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (9, 'Rua I, 606', 90123000, ['Coturno'], 1, 499.99);
+INSERT INTO orders (id, address, cep, itens, quantity, value) VALUES (10, 'Rua J, 707', 12346000, ['Chuteira'], 1, 259.99);
+
+
+
+
+
+
+
+
+
